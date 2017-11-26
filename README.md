@@ -12,6 +12,7 @@ Based on Lombok version 1.16.16 - because latest version (1.16.18) doesn't work 
 
 Annotation **LogEntry** can be applied on single method or on entire class. When class annotated, annotation and it's settings 
 applied to all methods without such annotation. Also one of Lombok logging annotation need.
+
 Parameters for annotation:
 
 * **isEntry** - generate log for method entry with all arguments (default - *true*)
@@ -39,10 +40,10 @@ public class Test {
 ...
   public boolean copyFile(String in, String out) throws IOException {
     long $timer = System.currentTimeMillis();
-    if (log.isTraceEnabled()) log.trace("entry: Test.copyFile(in={},out={})",in, out));
+    if (log.isTraceEnabled()) log.trace("entry: Test.copyFile(in={},out={})",in, out);
     ...
     boolean $result = !internalVar.isEmpty();
-    if (log.isTraceEnabled()) log.trace("exit: copyFile({}) = {} ms", $result, System.currentTimeMillis() - $timer));
+    if (log.isTraceEnabled()) log.trace("exit: Test.copyFile({}) = {} ms", $result, System.currentTimeMillis() - $timer);
     return $result;
   }
 }
@@ -78,7 +79,7 @@ public class Test {
 ...
   public boolean copyFileOne(String in, String out) throws IOException {
     long $timer = System.currentTimeMillis();
-    if (log.isTraceEnabled()) log.trace("entry: Test.copyFileOne(in={},out={})",in, out));
+    if (log.isTraceEnabled()) log.trace("entry: Test.copyFileOne(in={},out={})",in, out);
     ...
     boolean $result = !internalVar.isEmpty();
     if (log.isTraceEnabled()) log.trace("exit: Test.copyFileOne({}) = {} ms", $result, System.currentTimeMillis() - $timer);
