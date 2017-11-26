@@ -43,7 +43,7 @@ public class Test {
     ...
     boolean $result = !internalVar.isEmpty();
     if (log.isTraceEnabled()) log.trace("exit: copyFile({}) = {} ms", $result, System.currentTimeMillis() - $timer));
-    return $result
+    return $result;
   }
 }
 ```
@@ -82,7 +82,7 @@ public class Test {
     ...
     boolean $result = !internalVar.isEmpty();
     if (log.isTraceEnabled()) log.trace("exit: Test.copyFileOne({}) = {} ms", $result, System.currentTimeMillis() - $timer);
-    return $result
+    return $result;
   }
 
   public void copyFileTwo(String in, String out) throws IOException {
@@ -96,7 +96,7 @@ public class Test {
     if (log.isDebugEnabled()) log.debug("exit: Test.copyFileThree()");
   }
 
-    }
+}
 ```
 
 
