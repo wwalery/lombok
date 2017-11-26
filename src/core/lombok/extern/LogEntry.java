@@ -51,10 +51,10 @@ import java.lang.annotation.Target;
  * <pre>
  * public boolean copyFile(String in, String out) throws IOException {
  *    long $timer = System.currentTimeMillis();
- *    log.trace("entry: copyFile(in={},out={})",in, out));
+ *    log.trace("entry: copyFile(in={},out={})",in, out);
  *     ...
  *    boolean $result = true;
- *    log.trace("exit: copyFile({}) = {} ms", $result, System.currentTimeMillis() - $timer));
+ *    log.trace("exit: copyFile({}) = {} ms", $result, System.currentTimeMillis() - $timer);
  *    return $result
  * }
  * </pre>
