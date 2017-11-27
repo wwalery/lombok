@@ -1,24 +1,24 @@
 # Project Lombok - fork with logging method entry/exit
 
-This fork add annotation *LogEntry* to Lombok framework.
+This fork adds annotation **LogEntry** to Lombok framework.
 With this annotation you may log entry/exit for any method. Also you may log method execution time.
 
 ## Installation
 
 See Project Lombok installation instructions.
-Based on Lombok version 1.16.16 - because latest version (1.16.18) doesn't work in my main IDE - NetBeans
+The fork is based on Lombok version 1.16.16 - because the latest version (1.16.18) doesn't work in my main IDE - NetBeans
 
 ### Usage
 
-Annotation **LogEntry** can be applied to single method or to entire class. When class annotated, annotation and it's settings
-applied to all methods without such annotation. Also one of Lombok logging annotation need.
+An annotation **LogEntry** can be applied to single method or to entire class. When a class is annotated, annotation and its settings
+are applied to all methods (if method doesn't have own annotation). Also one of Lombok logging annotation is necessary.
 
 Parameters for annotation:
 
-* **isEntry** - generate log for method entry with all method arguments (default - *true*)
-* **isExit** - generate log for method exit, with return logging (default - *true*)
+* **isEntry** - generates log of method entry with all method arguments (default - *true*)
+* **isExit** - generates log of method exit, with method result logging (default - *true*)
 * **method** - method for logging (default - *trace*, in JUL - *finest*)
-* **withTimer** - generate timing for method execution (default - *true*). Valid only when *isExit* is *true*.
+* **withTimer** - generates timing of method execution (default - *true*). It's valid only if *isExit* is *true*.
 
 
 Example:
@@ -50,7 +50,7 @@ public class Test {
 ```
 
 
-But when one method annotated, all annotation settings applied to this method, without taking into account the class annotation:
+But when one method is annotated, all annotation settings are applied to this method, without taking into account the class annotation:
 ```java
 @Slf4j
 @LogEntry
