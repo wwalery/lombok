@@ -23,12 +23,14 @@ package lombok.javac.handlers;
 
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import org.mangosdk.spi.ProviderFor;
 
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.List;
+import java.util.Arrays;
 import javax.lang.model.type.TypeKind;
 
 import lombok.ConfigurationKeys;
@@ -96,10 +98,10 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
     if (logEntry.isEntry()) {
       createLogEntry(node, false, false);
     }
-    if (logEntry.withTimer()) {
-      createTimer(node);
-    }
     if (logEntry.isExit()) {
+      if (logEntry.withTimer()) {
+        createTimer(node);
+      }
       createLogExit(node, logEntry.withTimer());
     }
   }
@@ -179,10 +181,16 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
     JavacTreeMaker maker = node.getTreeMaker();
     JCVariableDecl timerDecl = maker.VarDef(
             maker.Modifiers(Flags.FINAL),
-            node.toName(TIMER_VARIABLE), maker.Ident(node.toName("long")),
-            JavacHandlerUtil.chainDots(node, "System", "currentTimeMillis()")
+            node.toName(TIMER_VARIABLE), maker.Ident(node.toName("Long")),
+            maker.Apply(List.<JCTree.JCExpression>nil(),
+                    maker.Select(maker.Ident(node.toName("System")), node.toName("currentTimeMillis")),
+                    List.<JCTree.JCExpression>nil())
     );
-    nodeToAdd.stats = nodeToAdd.stats.prepend(timerDecl);
+    if (JavacHandlerUtil.isConstructorCall(nodeToAdd.stats.head)) {
+      nodeToAdd.stats.tail = nodeToAdd.stats.tail.prepend(timerDecl);
+    } else {
+      nodeToAdd.stats = nodeToAdd.stats.prepend(timerDecl);
+    }
   }
 
   private JCTree.JCStatement generateLogCall(JavacNode node, List<JCTree.JCExpression> logArgs) {
@@ -252,8 +260,10 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
     }
   }
 
-  private void processBlock(JavacNode node, List<JCStatement> statements, boolean withTimer) {
+  private void processBlock(JavacNode node, List<JCStatement> statements, boolean withTimer, boolean isMainBlock) {
     List<JCStatement> stats = statements;
+    List<JCStatement> prevStats = statements;
+    boolean hasReturn = false;
     while (stats.head != null) {
       JCStatement stat = stats.head;
       List<JCStatement> result = processStatement(node, stat, withTimer);
@@ -261,17 +271,26 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
         JavacTreeMaker maker = node.getTreeMaker();
 //        JCBlock returnBlock = maker.Block(0, result);
         stats.head = result.size() == 1 ? result.head : maker.Block(0, result);
+        hasReturn = true;
+      } else {
+        hasReturn = false;
       }
+      prevStats = stats;
       stats = stats.tail;
+    }
+    if (isMainBlock && !hasReturn) {
+      List<JCStatement> result = processReturn(node, null, withTimer);
+      JavacTreeMaker maker = node.getTreeMaker();
+//      prevStats.tail = prevStats.tail.append(result.size() == 1 ? result.head : maker.Block(0, result));
     }
   }
 
   private List<JCStatement> processStatement(JavacNode node, JCStatement stat, boolean withTimer) {
     JavacTreeMaker maker = node.getTreeMaker();
     if (stat instanceof JCBlock) {
-      processBlock(node, ((JCBlock) stat).stats, withTimer);
+      processBlock(node, ((JCBlock) stat).stats, withTimer, false);
     } else if (stat instanceof JCCase) {
-      processBlock(node, ((JCCase) stat).stats, withTimer);
+      processBlock(node, ((JCCase) stat).stats, withTimer, false);
     } else if (stat instanceof JCIf) {
       List<JCStatement> result = processStatement(node, ((JCIf) stat).thenpart, withTimer);
       if (result != null) {
@@ -282,13 +301,13 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
         ((JCIf) stat).elsepart = result.size() == 1 ? result.head : maker.Block(0, result);
       }
     } else if (stat instanceof JCCase) {
-      processBlock(node, ((JCCase) stat).stats, withTimer);
+      processBlock(node, ((JCCase) stat).stats, withTimer, false);
     } else if (stat instanceof JCSynchronized) {
-      processBlock(node, ((JCSynchronized) stat).body.stats, withTimer);
+      processBlock(node, ((JCSynchronized) stat).body.stats, withTimer, false);
     } else if (stat instanceof JCTry) {
-      processBlock(node, ((JCTry) stat).body.stats, withTimer);
+      processBlock(node, ((JCTry) stat).body.stats, withTimer, false);
     } else if (stat instanceof JCTry) {
-      processBlock(node, ((JCTry) stat).body.stats, withTimer);
+      processBlock(node, ((JCTry) stat).body.stats, withTimer, false);
     } else if (stat instanceof JCReturn) {
       return processReturn(node, (JCReturn) stat, withTimer);
     }
@@ -297,12 +316,12 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
 
   private List<JCStatement> processReturn(JavacNode node, JCReturn stat, boolean withTimer) {
     JCMethodDecl method = (JCMethodDecl) node.get();
-    boolean hasReturnAny = !((method.restype == null) || ((method.restype instanceof JCPrimitiveTypeTree) && (((JCPrimitiveTypeTree) method.restype).getPrimitiveTypeKind() == TypeKind.VOID)));
+    boolean hasReturnAny = !((stat == null) || (method.restype == null)
+            || ((method.restype instanceof JCPrimitiveTypeTree) && (((JCPrimitiveTypeTree) method.restype).getPrimitiveTypeKind() == TypeKind.VOID)));
     JavacTreeMaker maker = node.getTreeMaker();
     String templateStr = "exit: " + node.up().getName() + "." + node.getName() + "("
             + (hasReturnAny ? (useParamsInLog ? "{}" : "%s") : "")
-            + (withTimer ? (useParamsInLog ? ") = {} ms" : "%s") : ")")
-            ;
+            + (withTimer ? (useParamsInLog ? ") = {} ms" : "%s") : ")");
     List<JCExpression> returnResult = List.<JCExpression>of(maker.Literal(templateStr));
     List<JCStatement> returnData = List.<JCStatement>nil();
     JCStatement result = stat;
@@ -338,17 +357,23 @@ public class HandleLogEntry extends JavacAnnotationHandler<LogEntry> {
     }
     if (withTimer) {
       JCExpression timer = maker.Binary(Javac.CTC_MINUS,
-              JavacHandlerUtil.chainDots(node, "System", "currentTimeMillis()"),
+              maker.Apply(List.<JCTree.JCExpression>nil(),
+                      maker.Select(maker.Ident(node.toName("System")), node.toName("currentTimeMillis")),
+                      List.<JCTree.JCExpression>nil()),
               maker.Ident(node.toName(TIMER_VARIABLE)));
       returnResult = returnResult.append(timer);
     }
     JCTree.JCStatement logResult = generateLogCall(node, returnResult);
-    return returnData.append(logResult).append(result);
+    List<JCStatement> res = returnData.append(logResult);
+    if (result != null) {
+      res = res.append(result);
+    }
+    return res;
   }
 
   private void createLogExit(JavacNode node, boolean withTimer) {
     JCMethodDecl method = (JCMethodDecl) node.get();
-    processBlock(node, method.body.stats, withTimer);
+    processBlock(node, method.body.stats, withTimer, true);
   }
 
 }
