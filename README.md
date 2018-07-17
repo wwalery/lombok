@@ -74,7 +74,7 @@ public class Test {
 ```
 
 produce:
-```
+```java
 public class Test {
 ...
   public boolean copyFileOne(String in, String out) throws IOException {
