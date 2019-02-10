@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 The Project Lombok Authors.
+ * Copyright (C) 2015-2018 The Project Lombok Authors.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,11 +30,13 @@ import lombok.core.handlers.HandlerUtil;
 import lombok.javac.JavacNode;
 import lombok.javac.JavacTreeMaker;
 import lombok.javac.handlers.JavacHandlerUtil;
+import lombok.javac.handlers.JavacSingularsRecipes.ExpressionMaker;
 import lombok.javac.handlers.JavacSingularsRecipes.SingularData;
+import lombok.javac.handlers.JavacSingularsRecipes.StatementMaker;
 
 import com.sun.tools.javac.code.Flags;
-import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
@@ -76,27 +78,16 @@ abstract class JavacJavaUtilListSetSingularizer extends JavacJavaUtilSingularize
 		return Collections.singletonList(injectFieldAndMarkGenerated(builderType, buildField));
 	}
 	
-	@Override public void generateMethods(SingularData data, boolean deprecate, JavacNode builderType, JCTree source, boolean fluent, boolean chain) {
+	@Override public void generateMethods(SingularData data, boolean deprecate, JavacNode builderType, JCTree source, boolean fluent, ExpressionMaker returnTypeMaker, StatementMaker returnStatementMaker) {
 		if (useGuavaInstead(builderType)) {
-			guavaListSetSingularizer.generateMethods(data, deprecate, builderType, source, fluent, chain);
+			guavaListSetSingularizer.generateMethods(data, deprecate, builderType, source, fluent, returnTypeMaker, returnStatementMaker);
 			return;
 		}
 		
 		JavacTreeMaker maker = builderType.getTreeMaker();
-		Symtab symbolTable = builderType.getSymbolTable();
-		Name thisName = builderType.toName("this");
-		
-		JCExpression returnType = chain ? cloneSelfType(builderType) : maker.Type(createVoidType(symbolTable, CTC_VOID));
-		JCStatement returnStatement = chain ? maker.Return(maker.Ident(thisName)) : null;
-		generateSingularMethod(deprecate, maker, returnType, returnStatement, data, builderType, source, fluent);
-		
-		returnType = chain ? cloneSelfType(builderType) : maker.Type(createVoidType(symbolTable, CTC_VOID));
-		returnStatement = chain ? maker.Return(maker.Ident(thisName)) : null;
-		generatePluralMethod(deprecate, maker, returnType, returnStatement, data, builderType, source, fluent);
-		
-		returnType = chain ? cloneSelfType(builderType) : maker.Type(createVoidType(symbolTable, CTC_VOID));
-		returnStatement = chain ? maker.Return(maker.Ident(thisName)) : null;
-		generateClearMethod(deprecate, maker, returnType, returnStatement, data, builderType, source);
+		generateSingularMethod(deprecate, maker, returnTypeMaker.make(), returnStatementMaker.make(), data, builderType, source, fluent);
+		generatePluralMethod(deprecate, maker, returnTypeMaker.make(), returnStatementMaker.make(), data, builderType, source, fluent);
+		generateClearMethod(deprecate, maker, returnTypeMaker.make(), returnStatementMaker.make(), data, builderType, source);
 	}
 	
 	private void generateClearMethod(boolean deprecate, JavacTreeMaker maker, JCExpression returnType, JCStatement returnStatement, SingularData data, JavacNode builderType, JCTree source) {
@@ -116,6 +107,7 @@ abstract class JavacJavaUtilListSetSingularizer extends JavacJavaUtilSingularize
 		JCBlock body = maker.Block(0, statements);
 		Name methodName = builderType.toName(HandlerUtil.buildAccessorName("clear", data.getPluralName().toString()));
 		JCMethodDecl method = maker.MethodDef(mods, methodName, returnType, typeParams, params, thrown, body, null);
+		recursiveSetGeneratedBy(method, source, builderType.getContext());
 		injectMethod(builderType, method);
 	}
 	
@@ -134,8 +126,12 @@ abstract class JavacJavaUtilListSetSingularizer extends JavacJavaUtilSingularize
 		long paramFlags = JavacHandlerUtil.addFinalIfNeeded(Flags.PARAMETER, builderType.getContext());
 		if (!fluent) name = builderType.toName(HandlerUtil.buildAccessorName("add", name.toString()));
 		JCExpression paramType = cloneParamType(0, maker, data.getTypeArgs(), builderType, source);
-		JCVariableDecl param = maker.VarDef(maker.Modifiers(paramFlags), data.getSingularName(), paramType, null);
+		List<JCAnnotation> typeUseAnns = getTypeUseAnnotations(paramType);
+		paramType = removeTypeUseAnnotations(paramType);
+		JCModifiers paramMods = typeUseAnns.isEmpty() ? maker.Modifiers(paramFlags) : maker.Modifiers(paramFlags, typeUseAnns);
+		JCVariableDecl param = maker.VarDef(paramMods, data.getSingularName(), paramType, null);
 		JCMethodDecl method = maker.MethodDef(mods, name, returnType, typeParams, List.of(param), thrown, body, null);
+		recursiveSetGeneratedBy(method, source, builderType.getContext());
 		injectMethod(builderType, method);
 	}
 	
@@ -157,6 +153,7 @@ abstract class JavacJavaUtilListSetSingularizer extends JavacJavaUtilSingularize
 		paramType = addTypeArgs(1, true, builderType, paramType, data.getTypeArgs(), source);
 		JCVariableDecl param = maker.VarDef(maker.Modifiers(paramFlags), data.getPluralName(), paramType, null);
 		JCMethodDecl method = maker.MethodDef(mods, name, returnType, typeParams, List.of(param), thrown, body, null);
+		recursiveSetGeneratedBy(method, source, builderType.getContext());
 		injectMethod(builderType, method);
 	}
 }

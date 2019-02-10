@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2017 The Project Lombok Authors.
+ * Copyright (C) 2013-2018 The Project Lombok Authors.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,10 @@ import java.lang.annotation.Target;
  * then a private constructor is generated with all fields as arguments
  * (as if {@code @AllArgsConstructor(AccessLevel.PRIVATE)} is present
  * on the class), and it is as if this constructor has been annotated with {@code @Builder} instead.
+ * Note that this constructor is only generated if you haven't written any constructors and also haven't
+ * added any explicit {@code @XArgsConstructor} annotations. In those cases, lombok will assume an all-args
+ * constructor is present and generate code that uses it; this means you'd get a compiler error if this
+ * constructor is not present.
  * <p>
  * The effect of {@code @Builder} is that an inner class is generated named <code><strong>T</strong>Builder</code>,
  * with a private constructor. Instances of <code><strong>T</strong>Builder</code> are made with the
@@ -55,8 +59,8 @@ import java.lang.annotation.Target;
  * 
  * <pre>
  * &#064;Builder
- * class Example {
- * 	private int foo;
+ * class Example&lt;T&gt; {
+ * 	private T foo;
  * 	private final String bar;
  * }
  * </pre>
@@ -103,6 +107,8 @@ import java.lang.annotation.Target;
  * 	}
  * }
  * </pre>
+ * 
+ * @see Singular
  */
 @Target({TYPE, METHOD, CONSTRUCTOR})
 @Retention(SOURCE)

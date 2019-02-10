@@ -1,3 +1,154 @@
+#clickForVideo {
+	padding: 20px 30px;
+	background-color: #DDD;
+	cursor: pointer;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 40px;
+}
+
+.tidelift-para {
+	margin-top: 10px;
+}
+
+#tideliftlink {
+	margin-left: 2px;
+	padding: 4px 6px 4px 20px;
+	background-image: url('/img/tidelift-mark.png');
+	background-repeat: no-repeat;
+	background-position: 4px;
+	background-size: 12px;
+	background-color: #4b5168;
+	border-radius: 5px;
+	color: white;
+}
+
+pre {
+	text-align: left;
+}
+
+.buttonLike {
+	cursor: pointer;
+	background: -webkit-linear-gradient(top, #FFFEF7, #CFCEC7);
+	background: -moz-linear-gradient(top, #FFFEF7, #CFCEC7);
+	background: -o-linear-gradient(#FFFEF7, #CFCEC7);
+	background: -ms-linear-gradient(#FFFEF7, #CFCEC7);
+	background: linear-gradient(top, #FFFEF7, #CFCEC7);
+	line-height: 1;
+	padding: 3px 10px;
+	border: 1px solid black;
+	position: relative;
+	overflow: visible;
+	color: black;
+	margin: 2px;
+	border-radius: 5px;
+	display: inline-block;
+	text-align: center;
+}
+
+.orderButton {
+	width: 280px;
+}
+
+.orderDetails {
+	font-style: italic;
+	font-size: 10px;
+	margin-top: 20px;
+}
+
+.formErr {
+	color: #FF7777;
+}
+
+.order-license #deleteCompanyLogo {
+	margin-top: 12px;
+}
+
+.formSubmitFail {
+	color: #FF6666;
+	font-size: 1.2em;
+	font-style: italic;
+}
+
+.order-license .btn-primary {
+	float: left;
+	margin-right: 20px;
+	background: -webkit-linear-gradient(#1725e0, #0923df 6%, #0b21ce);
+	background: -o-linear-gradient(#1725e0, #0923df 6%, #0b21ce);
+	background: -webkit-gradient(linear, left top, left bottom, from(#1725e0), color-stop(6%, #0923df), to(#0b21ce));
+	background: linear-gradient(#1725e0, #0923df 6%, #0b21ce);
+	background-repeat: no-repeat;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff1725e0', endColorstr='#ff0b21ce', GradientType=0);
+	-webkit-filter: none;
+	filter: none;
+	border: 1px solid #091bac;
+}
+
+#onlyYearlyWarning {
+	font-size: 0.8em;
+	padding-left: 16px;
+}
+
+.deemphasize {
+	color: #AAAAAA;
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+.supporterBar .introText {
+	margin-top: 16px;
+}
+
+.barItem {
+	margin: 16px;
+	max-width: 168px;
+}
+
+.barItem img {
+	width: 100%;
+}
+
+.supportItem, .barItem {
+	display: inline-block;
+}
+
+.supporters .supportItem {
+	margin: 6px 10px;
+}
+
+.supporterBar {
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.errorBox {
+	border: 1px dashed #F44;
+	font-size: 1.2em;
+	padding: 20px;
+	background-color: #EEE;
+	text-align: center;
+}
+
+.noSupportersBox {
+	font-size: 1.2em;
+	padding: 20px;
+	background-color: #EEE;
+	text-align: center;
+}
+
+.spinner {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 16px;
+	height: 16px;
+}
+
+#companyLogo {
+	margin-right: 8px;
+}
+
 html {
 	position: relative;
 	min-height: 100%;
@@ -96,7 +247,7 @@ div.snippet code {
 }
 
 h1, h2, h3 {
-	padding: 40px;
+	padding: 12px 40px;
 	text-align: center;
 }
 
@@ -168,7 +319,7 @@ a {
 	text-align: left;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.fork-me {
 		display: none;
 	}
@@ -194,9 +345,31 @@ a {
 		width: 100%;
 		height: auto;
 	}
+	
+	.smallOnly {
+		display: block !important;
+	}
+	
+	.wideOnly {
+		display: none !important;
+	}
+}
+
+@media (min-width: 768px) {
+	.smallOnly {
+		display: none !important;
+	}
+	
+	.wideOnly {
+		display: block !important;
+	}
 }
 
 img {
 	max-width: 100%;
 	height: auto;
+}
+
+h3.listHeader {
+	text-align: left;
 }

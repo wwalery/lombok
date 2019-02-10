@@ -1,12 +1,14 @@
 <#import "../../_scaffold.html" as main>
 <#import "../_features.html" as f>
 
-<@main.scaffold>
+<@main.scaffold title="Experimental">
 	<div class="page-header top5">
 		<div class="row text-center">
 			<@main.h1 title="Lombok experimental features" />
 		</div>
 		<div class="row">
+			The <a href="/api/">Lombok javadoc</a> is available, but we advise these pages.
+			
 			<p>
 				Experimental features are available in your normal lombok installation, but are not as robustly supported as lombok's main features. In particular, experimental features:
 				<ul>
@@ -59,6 +61,14 @@
 
 			<@main.feature title="@Helper" href="Helper">
 				With a little help from my friends... Helper methods for java.
+			</@main.feature>
+
+			<@main.feature title="@FieldNameConstants" href="FieldNameConstants">
+				Name... that... field! String constants for your field's names.
+			</@main.feature>
+
+			<@main.feature title="@SuperBuilder" href="SuperBuilder">
+				Bob now knows his ancestors: Builders with fields from superclasses, too.
 			</@main.feature>
 		</div>
 

@@ -1,5 +1,5 @@
 <#import "/_scaffold.html" as main>
-<@main.scaffold>
+<@main.scaffold title="Download">
 	<div class="page-header top5">
 		<div>
 			<div class="row page-center">
@@ -8,7 +8,8 @@
 						<div class="row">
 							<icon class="fa fa-download"></icon>
 							<a href="/downloads/lombok.jar">
-								Download ${version}
+								Download <span id="currentVersion">${version}</span>
+								<span id="currentVersionFull" style="display: none;">${fullVersion}</span>
 							</a>
 						</div>
 					</h1>

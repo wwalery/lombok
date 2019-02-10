@@ -4,9 +4,7 @@ class ConstructorsWithAccessors {
 	int _huh;
 	int __huh2;
 
-	@java.beans.ConstructorProperties({"plower", "upper", "huh", "_huh2"})
 	@java.lang.SuppressWarnings("all")
-	@javax.annotation.Generated("lombok")
 	public ConstructorsWithAccessors(final int plower, final int upper, final int huh, final int _huh2) {
 		this.plower = plower;
 		this.pUpper = upper;
@@ -25,21 +23,19 @@ class ConstructorsWithAccessorsNonNull {
 	@lombok.NonNull
 	final Integer __huh2;
 
-	@java.beans.ConstructorProperties({"plower", "upper", "huh", "_huh2"})
 	@java.lang.SuppressWarnings("all")
-	@javax.annotation.Generated("lombok")
 	public ConstructorsWithAccessorsNonNull(@lombok.NonNull final Integer plower, @lombok.NonNull final Integer upper, @lombok.NonNull final Integer huh, @lombok.NonNull final Integer _huh2) {
 		if (plower == null) {
-			throw new java.lang.NullPointerException("plower");
+			throw new java.lang.NullPointerException("plower is marked @NonNull but is null");
 		}
 		if (upper == null) {
-			throw new java.lang.NullPointerException("upper");
+			throw new java.lang.NullPointerException("upper is marked @NonNull but is null");
 		}
 		if (huh == null) {
-			throw new java.lang.NullPointerException("huh");
+			throw new java.lang.NullPointerException("huh is marked @NonNull but is null");
 		}
 		if (_huh2 == null) {
-			throw new java.lang.NullPointerException("_huh2");
+			throw new java.lang.NullPointerException("_huh2 is marked @NonNull but is null");
 		}
 		this.plower = plower;
 		this.pUpper = upper;
